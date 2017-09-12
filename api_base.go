@@ -59,6 +59,76 @@ func GetApi(method string) BestpayApi {
 	return apiRegistry[method]
 }
 
+/**
+提供几个公共方法
+*/
+//分账数据结构
+type Ledger map[string]int
+
+func (l Ledger) Set(subMchId string, amount int) error {
+	if len(subMchId) == 0 {
+		return errors.New("subMchId can not be nil")
+	}
+
+	if amount == 0 {
+		return errors.New("amount can not be zero")
+	}
+
+	l[subMchId] = amount
+
+	return nil
+}
+
+func (l Ledger) Get(subMchId string) int {
+	return l[subMchId]
+}
+
+//设置分账信息.并转化为接口满足的格式
+func SetLedgers(total_amt int, legder Ledger) (string, error) {
+	/**
+	支付时规则
+	分账支付规则:分账商户必须是分账支付商户的子商户、
+	分账金额必须大于 0 分，最小 分账单位为 1 分、
+	单笔参与分账商户个数不能超过 10 个、
+	单笔交易参与分账商户只能出现 一次。
+	*/
+
+	if n := len(legder); n == 0 {
+		return "", errors.New("legder is nil")
+	} else if n > 10 {
+		return "", errors.New("legder max number is ten")
+	}
+
+	//分账商户必须是分账支付商户的子商户、这个暂时无法判断.交给对方去处理.
+	//分账金额必须大于 0 分，最小 分账单位为 1 分、
+	if total_amt == 0 {
+		return "", errors.New("total amount is zero")
+	}
+
+	ret := ""
+	for subMchId, amount := range legder {
+		if amount < 1 {
+			return "", errors.New("per legder min amount is 1")
+		}
+		total_amt -= amount
+		ret += fmt.Sprintf("%s:%d|", subMchId, amount)
+	}
+
+	if total_amt > 0 {
+		return "", errors.New("total amount not equal sum(legder amount)")
+	}
+
+	if len(ret) <= 1 {
+		return "", errors.New("system error")
+	}
+
+	ret = ret[:len(ret)-1]
+
+	return ret, nil
+}
+
+
+
 type BestpayApi struct {
 	Key       string //bestpay 针对每个商户申请之后都会有一个秘钥..需要进行配置.
 	params    bizInterface
