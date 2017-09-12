@@ -114,7 +114,7 @@ func SetLedgers(total_amt int, legder Ledger) (string, error) {
 		ret += fmt.Sprintf("%s:%d|", subMchId, amount)
 	}
 
-	if total_amt > 0 {
+	if total_amt != 0 {
 		return "", errors.New("total amount not equal sum(legder amount)")
 	}
 
@@ -126,8 +126,6 @@ func SetLedgers(total_amt int, legder Ledger) (string, error) {
 
 	return ret, nil
 }
-
-
 
 type BestpayApi struct {
 	Key       string //bestpay 针对每个商户申请之后都会有一个秘钥..需要进行配置.
