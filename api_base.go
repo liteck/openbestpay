@@ -127,6 +127,104 @@ func SetLedgers(total_amt int, legder Ledger) (string, error) {
 	return ret, nil
 }
 
+/**
+BANKID 的字段说明
+输入接口响应过来的 bankid.. 返回对应的说明
+*/
+type BankId struct {
+	Category string //类别
+	BankId   string //bankId 字段.
+	Desc     string //具体说明
+}
+
+func GetBankId(bankid string) (bid BankId) {
+	switch bankid {
+	case "COMPANYACC_3AC":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "立减优惠",
+		}
+		break
+	case "EPAYTRAVELACC_3AC":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "翼游账户",
+		}
+		break
+	case "EPAYACC":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "翼支付账户",
+		}
+		break
+	case "VOUCHER_3AC":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "营销代金券",
+		}
+		break
+	case "BESTCARDOLD":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "老翼支付卡",
+		}
+		break
+	case "BESTCARD":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "新翼支付卡",
+		}
+		break
+	case "EPAYTRAVELCARD_PRE":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "翼游卡",
+		}
+		break
+	case "EPAYACCWM":
+		bid = BankId{
+			Category: "个账余额",
+			BankId:   bankid,
+			Desc:     "翼支付无密账户",
+		}
+		break
+	default:
+		bid.BankId = bankid
+		//其它的均归类于这里...
+		if strings.HasSuffix(bankid, "_RPB2C") ||
+			strings.HasSuffix(bankid, "_QB2C") ||
+			strings.HasSuffix(bankid, "_Q") {
+			bid.Category = "快捷支付"
+			bid.Desc = "快捷支付类型"
+		} else if strings.HasSuffix(bankid, "_B2B") ||
+			strings.HasSuffix(bankid, "B2B") {
+			bid.Category = "企业网银"
+			bid.Desc = "对公业务类型"
+		} else if strings.HasSuffix(bankid, "_B2C") ||
+			strings.HasSuffix(bankid, "_C") ||
+			strings.HasSuffix(bankid, "_D") {
+			bid.Category = "个人网银"
+			bid.Desc = "对私业务类型"
+		} else {
+			bid = BankId{
+				Category: "无",
+				BankId:   bankid,
+				Desc:     "无此信息",
+			}
+		}
+		break
+	}
+
+	return bid
+}
+
 type BestpayApi struct {
 	Key       string //bestpay 针对每个商户申请之后都会有一个秘钥..需要进行配置.
 	params    bizInterface
